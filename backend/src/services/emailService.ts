@@ -229,7 +229,45 @@ export function generateBrandedEmailHtml(options: {
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="supported-color-schemes" content="light dark"/>
   <title>${options.subject}</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      supported-color-schemes: light dark;
+    }
+    .brand-header-bg {
+      background-color: ${brand.headerBg} !important;
+      background: ${brand.headerBg} linear-gradient(${brand.headerBg}, ${brand.headerBg}) !important;
+      background-image: linear-gradient(${brand.headerBg}, ${brand.headerBg}) !important;
+    }
+    .brand-bar-bg {
+      background-color: ${brand.accentBarBg} !important;
+      background: ${brand.accentBarBg} linear-gradient(${brand.accentBarBg}, ${brand.accentBarBg}) !important;
+      background-image: linear-gradient(${brand.accentBarBg}, ${brand.accentBarBg}) !important;
+    }
+    @media (prefers-color-scheme: dark) {
+      .brand-header-bg {
+        background-color: ${brand.headerBg} !important;
+        background: ${brand.headerBg} linear-gradient(${brand.headerBg}, ${brand.headerBg}) !important;
+        background-image: linear-gradient(${brand.headerBg}, ${brand.headerBg}) !important;
+      }
+      .brand-bar-bg {
+        background-color: ${brand.accentBarBg} !important;
+        background: ${brand.accentBarBg} linear-gradient(${brand.accentBarBg}, ${brand.accentBarBg}) !important;
+        background-image: linear-gradient(${brand.accentBarBg}, ${brand.accentBarBg}) !important;
+      }
+    }
+    [data-ogsb] .brand-header-bg {
+      background-color: ${brand.headerBg} !important;
+      background-image: linear-gradient(${brand.headerBg}, ${brand.headerBg}) !important;
+    }
+    [data-ogsb] .brand-bar-bg {
+      background-color: ${brand.accentBarBg} !important;
+      background-image: linear-gradient(${brand.accentBarBg}, ${brand.accentBarBg}) !important;
+    }
+  </style>
 </head>
 <body style="margin: 0; padding: 0; background-color: #f1f3f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
   <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color: #f1f3f6; padding: 24px 12px;">
@@ -240,7 +278,7 @@ export function generateBrandedEmailHtml(options: {
           
           <!-- Brand Header -->
           <tr>
-            <td align="center" style="background-color: ${brand.headerBg}; padding: 28px 20px 22px 20px;">
+            <td align="center" bgcolor="${brand.headerBg}" class="brand-header-bg" style="background-color: ${brand.headerBg} !important; background: ${brand.headerBg} linear-gradient(${brand.headerBg}, ${brand.headerBg}) !important; background-image: linear-gradient(${brand.headerBg}, ${brand.headerBg}) !important; padding: 28px 20px 22px 20px;">
               <img
                 src="${options.logoSrc}"
                 alt="${brand.displayName}"
@@ -272,7 +310,7 @@ export function generateBrandedEmailHtml(options: {
 
           <!-- Accent Bottom Bar -->
           <tr>
-            <td style="background-color: ${brand.accentBarBg}; height: 8px; line-height: 8px; font-size: 8px;">&nbsp;</td>
+            <td bgcolor="${brand.accentBarBg}" class="brand-bar-bg" style="background-color: ${brand.accentBarBg} !important; background: ${brand.accentBarBg} linear-gradient(${brand.accentBarBg}, ${brand.accentBarBg}) !important; background-image: linear-gradient(${brand.accentBarBg}, ${brand.accentBarBg}) !important; height: 8px; line-height: 8px; font-size: 8px;">&nbsp;</td>
           </tr>
 
           <!-- Footer -->
