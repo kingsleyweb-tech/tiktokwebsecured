@@ -200,29 +200,52 @@ export function generateBrandedEmailHtml(options: {
 }): string {
   const brand = getPlatformBrandInfo(options.platform);
 
-  // Parse paragraphs and links
-  const paragraphs = options.message.split(/\n{2,}/);
+  // 1. Extract simulation link URL (either markdown [label](url) or raw url)
+  const mdMatch = options.message.match(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/);
+  const rawMatch = options.message.match(/(https?:\/\/[^\s<)"]+)/);
+  const targetUrl = mdMatch ? mdMatch[2] : (rawMatch ? rawMatch[1] : null);
+
+  // 2. Clean message body: strip raw URLs, strip duplicate [Click Here](...) and duplicate Click Here mentions
+  let cleanMessage = options.message;
+  if (targetUrl) {
+    // Remove markdown links
+    cleanMessage = cleanMessage.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/gi, '');
+    // Remove raw URLs so they never show as plain text
+    cleanMessage = cleanMessage.replace(/(https?:\/\/[^\s<)"]+)/gi, '');
+    // Remove any orphan duplicate "Click Here" phrases left in text
+    cleanMessage = cleanMessage.replace(/\bClick Here\b/gi, '');
+    // Clean trailing colons at end of lines
+    cleanMessage = cleanMessage.replace(/:\s*$/gm, '');
+  }
+
+  // Parse paragraphs
+  const paragraphs = cleanMessage.split(/\n{2,}/);
   const formattedBody = paragraphs
     .map((para) => {
       let p = para.trim();
       if (!p) return '';
       // Bold: **text**
       p = p.replace(/\*\*(.+?)\*\*/g, '<strong style="color:#0f172a;">$1</strong>');
-      // Markdown links: [label](url)
-      p = p.replace(
-        /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
-        '<a href="$2" target="_blank" style="color: #0076b2; text-decoration: underline; font-weight: 600; word-break: break-all;">$1</a>'
-      );
-      // Raw URLs not already inside tags
-      p = p.replace(
-        /(^|[^">])(https?:\/\/[^\s<)]+?)([.,;]?)(\s|$|<)/g,
-        '$1<a href="$2" target="_blank" style="color: #0076b2; text-decoration: underline; font-weight: 600; word-break: break-all;">$2</a>$3$4'
-      );
       // Single line breaks inside paragraph
       p = p.replace(/\n/g, '<br/>');
       return `<p style="margin: 0 0 16px 0; font-size: 14.5px; line-height: 1.7; color: #334155; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">${p}</p>`;
     })
     .join('');
+
+  // 3. Exactly ONE prominent yellow "Click Here" button
+  const buttonHtml = targetUrl
+    ? `
+      <!-- Single Yellow Click Here Button -->
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 26px auto 22px auto; text-align: center;">
+        <tr>
+          <td align="center" bgcolor="#FFFC00" class="brand-header-bg" style="border-radius: 9999px; background-color: #FFFC00 !important; background: #FFFC00 linear-gradient(#FFFC00, #FFFC00) !important; background-image: linear-gradient(#FFFC00, #FFFC00) !important; padding: 0;">
+            <a href="${targetUrl}" target="_blank" style="display: inline-block; padding: 14px 38px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 15px; font-weight: 700; color: #000000 !important; text-decoration: none; border-radius: 9999px; border: 1px solid #eab308; background-color: #FFFC00; background: #FFFC00 linear-gradient(#FFFC00, #FFFC00); text-align: center; mso-padding-alt: 0;">
+              Click Here
+            </a>
+          </td>
+        </tr>
+      </table>`
+    : '';
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -298,6 +321,7 @@ export function generateBrandedEmailHtml(options: {
 
               <div style="font-size: 14.5px; line-height: 1.7; color: #334155;">
                 ${formattedBody}
+                ${buttonHtml}
               </div>
 
               <!-- Sign-off -->
@@ -335,22 +359,24 @@ export function generateBrandedEmailHtml(options: {
 </html>`;
 }
 
-/** Convert plain text markdown links and raw standalone URLs to HTML anchor tags */
+/** Convert plain text to HTML with a single yellow Click Here button and no exposed raw URLs */
 export function convertMarkdownToHtml(text: string): string {
-  // 1. Convert markdown-style links [Anchor Text](http...)
-  let html = text.replace(
-    /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
-    '<a href="$2" style="color: #2563eb; font-weight: 600; text-decoration: underline;">$1</a>'
-  );
+  const mdMatch = text.match(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/);
+  const rawMatch = text.match(/(https?:\/\/[^\s<)"]+)/);
+  const targetUrl = mdMatch ? mdMatch[2] : (rawMatch ? rawMatch[1] : null);
 
-  // 2. Convert standalone raw URLs (not already inside href="...")
-  html = html.replace(
-    /(^|[^">])(https?:\/\/[^\s<)]+?)([.,;]?)(\s|$|<)/g,
-    '$1<a href="$2" style="color: #2563eb; font-weight: 600; text-decoration: underline;">$2</a>$3$4'
-  );
+  let clean = text;
+  if (targetUrl) {
+    clean = clean.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/gi, '');
+    clean = clean.replace(/(https?:\/\/[^\s<)"]+)/gi, '');
+    clean = clean.replace(/\bClick Here\b/gi, '');
+    clean = clean.replace(/:\s*$/gm, '');
+  }
 
-  // 3. Convert newlines to HTML breaks
-  html = html.replace(/\n/g, '<br/>');
+  let html = clean.replace(/\n/g, '<br/>');
+  if (targetUrl) {
+    html += `<br/><br/><div style="text-align:center;margin:20px 0;"><a href="${targetUrl}" target="_blank" style="display:inline-block;padding:12px 32px;background-color:#FFFC00;color:#000000;font-weight:700;border-radius:9999px;text-decoration:none;border:1px solid #eab308;">Click Here</a></div>`;
+  }
   return html;
 }
 

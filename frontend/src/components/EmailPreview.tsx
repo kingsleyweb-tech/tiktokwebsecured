@@ -47,32 +47,46 @@ function PlatformLogo({ platform }: { platform: TemplatePlatform }) {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// Body text renderer — converts simple markdown-ish text to preview HTML
+// Body text renderer — converts message text and renders a single yellow Click Here button
 // ────────────────────────────────────────────────────────────────────────────
 function renderBody(text: string): { __html: string } {
-  const paragraphs = text.split(/\n{2,}/);
+  // 1. Extract simulation link URL
+  const mdMatch = text.match(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/);
+  const rawMatch = text.match(/(https?:\/\/[^\s<)"]+)/);
+  const targetUrl = mdMatch ? mdMatch[2] : (rawMatch ? rawMatch[1] : null);
+
+  // 2. Clean message body: strip raw URLs, duplicate [Click Here](...), and duplicate "Click Here" text
+  let clean = text;
+  if (targetUrl) {
+    clean = clean.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/gi, '');
+    clean = clean.replace(/(https?:\/\/[^\s<)"]+)/gi, '');
+    clean = clean.replace(/\bClick Here\b/gi, '');
+    clean = clean.replace(/:\s*$/gm, '');
+  }
+
+  const paragraphs = clean.split(/\n{2,}/);
   const html = paragraphs
     .map((para) => {
       let p = para.trim();
       if (!p) return '';
       // Bold: **text**
       p = p.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-      // Markdown links: [label](url)
-      p = p.replace(
-        /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
-        '<a href="#preview" style="color:#0076b2;text-decoration:underline;word-break:break-all;">$1</a>',
-      );
-      // Raw URLs
-      p = p.replace(
-        /(https?:\/\/[^\s<"]+)/g,
-        '<a href="#preview" style="color:#0076b2;text-decoration:underline;word-break:break-all;">$1</a>',
-      );
       // Line breaks within paragraph
       p = p.replace(/\n/g, '<br/>');
       return `<p style="margin:0 0 16px 0;font-size:14px;line-height:1.7;color:#333333;">${p}</p>`;
     })
     .join('');
-  return { __html: html };
+
+  // 3. Exactly ONE yellow "Click Here" button
+  const buttonHtml = targetUrl
+    ? `<div style="text-align:center;margin:24px 0 18px 0;">
+        <a href="#preview" style="display:inline-block;padding:13px 36px;background-color:#FFFC00;background:linear-gradient(#FFFC00,#FFFC00);color:#000000;font-weight:700;font-size:15px;border-radius:9999px;text-decoration:none;border:1px solid #eab308;box-shadow:0 2px 10px rgba(0,0,0,0.12);cursor:pointer;letter-spacing:0.01em;">
+          Click Here
+        </a>
+      </div>`
+    : '';
+
+  return { __html: html + buttonHtml };
 }
 
 // ────────────────────────────────────────────────────────────────────────────

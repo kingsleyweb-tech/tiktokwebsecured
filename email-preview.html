@@ -362,21 +362,36 @@ Read more about what to do if your account may be compromised [here](https://sup
 
 <script>
   function renderBody(text) {
-    const paragraphs = text.split(/\n{2,}/);
-    return paragraphs.map(para => {
+    const mdMatch = text.match(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/);
+    const rawMatch = text.match(/(https?:\/\/[^\s<)"]+)/);
+    const targetUrl = mdMatch ? mdMatch[2] : (rawMatch ? rawMatch[1] : null);
+
+    let clean = text;
+    if (targetUrl) {
+      clean = clean.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/gi, '');
+      clean = clean.replace(/(https?:\/\/[^\s<)"]+)/gi, '');
+      clean = clean.replace(/\bClick Here\b/gi, '');
+      clean = clean.replace(/:\s*$/gm, '');
+    }
+
+    const paragraphs = clean.split(/\n{2,}/);
+    const bodyHtml = paragraphs.map(para => {
       let p = para.trim();
       if (!p) return '';
-      // **bold**
       p = p.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-      // [label](url) markdown links
-      p = p.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
-        '<a href="$2">$1</a>');
-      // raw URLs
-      p = p.replace(/(https?:\/\/[^\s<"]+)/g,
-        '<a href="$1">$1</a>');
       p = p.replace(/\n/g, '<br/>');
       return `<p>${p}</p>`;
     }).join('');
+
+    const buttonHtml = targetUrl
+      ? `<div style="text-align:center;margin:24px 0 18px 0;">
+          <a href="${targetUrl}" target="_blank" style="display:inline-block;padding:13px 36px;background-color:#FFFC00;background:linear-gradient(#FFFC00,#FFFC00);color:#000000;font-weight:700;font-size:15px;border-radius:9999px;text-decoration:none;border:1px solid #eab308;box-shadow:0 2px 10px rgba(0,0,0,0.12);cursor:pointer;">
+            Click Here
+          </a>
+        </div>`
+      : '';
+
+    return bodyHtml + buttonHtml;
   }
 
   function updatePreview() {

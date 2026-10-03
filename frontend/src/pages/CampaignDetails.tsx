@@ -362,30 +362,14 @@ export default function CampaignDetails() {
     };
   };
 
-  const insertSimulationLink = () => {
-    const textarea = document.getElementById('email-message-textarea') as HTMLTextAreaElement | null;
-    if (textarea) {
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const text = textarea.value;
-      const before = text.substring(0, start);
-      const after = text.substring(end, text.length);
-      const newText = before + simulationUrl + after;
-      setEmailMessage(newText);
-      setTimeout(() => {
-        textarea.focus();
-        const cursor = start + simulationUrl.length;
-        textarea.setSelectionRange(cursor, cursor);
-      }, 0);
-    } else {
-      setEmailMessage((prev) => prev + '\n' + simulationUrl);
+  const insertSimulationButton = () => {
+    // Ensure only ONE simulation link appears in the message
+    if (emailMessage.includes(simulationUrl) || /\[Click Here\]/i.test(emailMessage)) {
+      alert('The "Click Here" button link is already included in your message. There should only be one link.');
+      return;
     }
-  };
 
-  const insertSimulationHyperlink = () => {
-    const displayText = prompt('Enter link text (e.g., "Click Here", "Verify Account"):', 'Click Here');
-    if (!displayText) return; // cancelled
-    const mdLink = `[${displayText}](${simulationUrl})`;
+    const tag = `\n\n[Click Here](${simulationUrl})\n`;
     const textarea = document.getElementById('email-message-textarea') as HTMLTextAreaElement | null;
     if (textarea) {
       const start = textarea.selectionStart;
@@ -393,15 +377,14 @@ export default function CampaignDetails() {
       const text = textarea.value;
       const before = text.substring(0, start);
       const after = text.substring(end, text.length);
-      const newText = before + mdLink + after;
-      setEmailMessage(newText);
+      setEmailMessage(before + tag + after);
       setTimeout(() => {
         textarea.focus();
-        const cursor = start + mdLink.length;
+        const cursor = start + tag.length;
         textarea.setSelectionRange(cursor, cursor);
       }, 0);
     } else {
-      setEmailMessage((prev) => prev + '\n' + mdLink);
+      setEmailMessage((prev) => prev + tag);
     }
   };
 
@@ -709,7 +692,7 @@ export default function CampaignDetails() {
                       const resolvedBody = tpl.body
                         .replace(/\{\{PLATFORM\}\}/g, platform)
                         .replace(/\{\{RECIPIENT_NAME\}\}/g, 'Team Member')
-                        .replace(/\{\{SIMULATION_LINK\}\}/g, simulationUrl);
+                        .replace(/\{\{SIMULATION_LINK\}\}/g, `[Click Here](${simulationUrl})`);
                       setEmailSubject(resolvedSubject);
                       setEmailMessage(resolvedBody);
                     }}
@@ -746,18 +729,12 @@ export default function CampaignDetails() {
                   <div className="flex gap-1.5 flex-wrap">
                     <button
                       type="button"
-                      onClick={insertSimulationHyperlink}
-                      className="text-[10px] font-semibold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 hover:border-emerald-200 transition-colors"
-                      title="Insert [Link Text](Simulation URL) format"
+                      onClick={insertSimulationButton}
+                      className="text-[10px] font-bold text-amber-900 bg-amber-200 hover:bg-amber-300 px-2.5 py-0.5 rounded-full border border-amber-300 transition-colors flex items-center gap-1 shadow-sm"
+                      title="Insert single yellow [Click Here] button link"
                     >
-                      Insert Text Link
-                    </button>
-                    <button
-                      type="button"
-                      onClick={insertSimulationLink}
-                      className="text-[10px] font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-100 hover:border-blue-200 transition-colors"
-                    >
-                      Insert Raw Link
+                      <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                      Insert "Click Here" Button
                     </button>
                     <button
                       type="button"
