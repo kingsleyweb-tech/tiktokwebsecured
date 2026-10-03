@@ -15,7 +15,7 @@ const EVENT_LABELS: Record<string, string> = {
 };
 
 const EVENT_COLORS: Record<string, string> = {
-  link_opened: 'bg-violet-500',
+  link_opened: 'bg-indigo-500',
   simulation_viewed: 'bg-amber-400',
   simulation_attempt: 'bg-rose-500',
   simulation_completed: 'bg-emerald-500',
@@ -100,7 +100,7 @@ export default function Dashboard() {
       value: loading ? '…' : String(totalCampaigns),
       change: `${activeCampaigns} active`,
       changeType: 'up' as const,
-      accentColor: 'bg-blue-50 text-blue-600',
+      accentColor: 'bg-indigo-50 text-indigo-600',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -156,22 +156,37 @@ export default function Dashboard() {
   const recentEvents = events.slice(0, 6);
 
   return (
-    <div className="p-4 sm:p-6 space-y-5 sm:space-y-6 max-w-screen-2xl mx-auto">
+    <div className="p-4 sm:p-6 space-y-5 sm:space-y-6 max-w-screen-2xl mx-auto animate-fade-in-up">
 
-      {/* ── Header ─────────────────────────────────────────────────── */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-lg sm:text-xl font-bold text-slate-800">Overview</h2>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            Monitor your phishing awareness campaigns at a glance.
-          </p>
+      {/* ── Header banner ──────────────────────────────────────────── */}
+      <div className="relative overflow-hidden rounded-2xl brand-gradient px-5 sm:px-7 py-6 sm:py-7 shadow-lg shadow-indigo-200/60">
+        {/* decorative blobs */}
+        <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-white/10 blur-2xl" />
+        <div className="absolute bottom-0 right-24 w-24 h-24 rounded-full bg-white/10 blur-xl" />
+
+        <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Welcome back, Admin</h2>
+            <p className="text-sm text-indigo-100 mt-1 max-w-md">
+              Monitor your phishing awareness campaigns and simulation activity at a glance.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            {isLive && (
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 text-white text-[11px] font-bold uppercase tracking-wider backdrop-blur-sm ring-1 ring-white/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Live
+              </span>
+            )}
+            <Link
+              to="/campaigns/create"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white text-indigo-700 text-sm font-semibold shadow-sm hover:bg-indigo-50 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+              New Campaign
+            </Link>
+          </div>
         </div>
-        {isLive && (
-          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-100 text-rose-600 text-[10px] sm:text-xs font-bold uppercase tracking-wider shrink-0">
-            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-            Live
-          </span>
-        )}
       </div>
 
       {/* ── Stat Cards — 1 col mobile, 2 col tablet, 4 col desktop ── */}
@@ -191,26 +206,26 @@ export default function Dashboard() {
 
       {/* ── Charts — stacked on mobile, side-by-side on lg+ ─────── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-5 min-h-[220px]">
+        <div className="lg:col-span-2 card p-4 sm:p-5 min-h-[220px]">
           <ActivityChart type="activity" />
         </div>
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-5 min-h-[220px]">
+        <div className="card p-4 sm:p-5 min-h-[220px]">
           <ActivityChart type="rate" />
         </div>
       </div>
 
       {/* ── Event distribution chart ─────────────────────────────── */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-5">
+      <div className="card p-4 sm:p-5">
         <ActivityChart type="events" />
       </div>
 
       {/* ── LIVE KEYSTROKE FEED ───────────────────────────────────── */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="card overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-slate-100 bg-gradient-to-r from-rose-50 to-white">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-rose-100 flex items-center justify-center shrink-0">
-              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-rose-100 flex items-center justify-center shrink-0">
+              <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                   d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
               </svg>
@@ -222,7 +237,7 @@ export default function Dashboard() {
               </p>
             </div>
           </div>
-          <span className="text-xs text-slate-400 font-mono shrink-0 ml-2">
+          <span className="text-xs text-slate-400 font-mono shrink-0 ml-2 bg-white px-2 py-1 rounded-lg border border-slate-100">
             {capturedInputs.length} record{capturedInputs.length !== 1 ? 's' : ''}
           </span>
         </div>
@@ -265,7 +280,7 @@ export default function Dashboard() {
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-100">
                   <th className="px-4 sm:px-5 py-2.5 w-10">
-                    <input type="checkbox" checked={allKsSelected} onChange={toggleKsAll} className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" />
+                    <input type="checkbox" checked={allKsSelected} onChange={toggleKsAll} className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
                   </th>
                   <th className="text-left text-xs font-semibold text-slate-500 px-4 sm:px-5 py-2.5 sm:py-3 uppercase tracking-wider">Platform</th>
                   <th className="text-left text-xs font-semibold text-slate-500 px-3 sm:px-4 py-2.5 sm:py-3 uppercase tracking-wider">Field</th>
@@ -281,9 +296,9 @@ export default function Dashboard() {
                   const ps = PLATFORM_STYLE[inp.platform] ?? { bg: 'bg-slate-100', text: 'text-slate-700', dot: 'bg-slate-400' };
                   const isPassword = inp.fieldName === 'credential_field';
                   return (
-                    <tr key={inp.id} className={`hover:bg-rose-50/30 transition-colors ${ksSelected.has(inp.id) ? 'bg-blue-50/50' : ''}`}>
+                    <tr key={inp.id} className={`hover:bg-indigo-50/30 transition-colors ${ksSelected.has(inp.id) ? 'bg-indigo-50/50' : ''}`}>
                       <td className="px-4 sm:px-5 py-2.5 sm:py-3">
-                        <input type="checkbox" checked={ksSelected.has(inp.id)} onChange={() => toggleKsOne(inp.id)} className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" />
+                        <input type="checkbox" checked={ksSelected.has(inp.id)} onChange={() => toggleKsOne(inp.id)} className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
                       </td>
                       <td className="px-4 sm:px-5 py-2.5 sm:py-3 whitespace-nowrap">
                         <span className={`inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-xs font-semibold ${ps.bg} ${ps.text}`}>
@@ -320,7 +335,7 @@ export default function Dashboard() {
                       <td className="px-3 sm:px-4 py-2.5 sm:py-3 hidden lg:table-cell">
                         <Link
                           to={`/campaigns/${inp.campaignId}`}
-                          className="font-mono text-[11px] text-blue-500 hover:text-blue-700 hover:underline truncate max-w-[120px] block"
+                          className="font-mono text-[11px] text-indigo-500 hover:text-indigo-700 hover:underline truncate max-w-[120px] block"
                         >
                           {inp.campaignId.substring(0, 12)}…
                         </Link>
@@ -348,7 +363,7 @@ export default function Dashboard() {
       </div>
 
       {/* ── Recent Events feed ───────────────────────────────────── */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+      <div className="card">
         <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-slate-100">
           <div>
             <h3 className="text-sm font-semibold text-slate-800">Recent Events</h3>
@@ -358,7 +373,7 @@ export default function Dashboard() {
           </div>
           <Link
             to="/events"
-            className="text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors shrink-0 ml-2"
+            className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors shrink-0 ml-2"
           >
             View all →
           </Link>
@@ -366,7 +381,7 @@ export default function Dashboard() {
 
         {loading ? (
           <div className="flex justify-center items-center p-8 sm:p-10">
-            <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-6 h-6 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : recentEvents.length === 0 ? (
           <div className="text-center py-8 sm:py-10 text-sm text-slate-400 px-4">
