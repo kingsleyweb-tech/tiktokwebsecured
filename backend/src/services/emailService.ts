@@ -108,10 +108,22 @@ export async function checkPlatformSmtpStatus(platform: string): Promise<{ statu
   }
 }
 
-/** Convert plain text markdown-like links to html anchor tags */
+/** Convert plain text markdown links and raw standalone URLs to HTML anchor tags */
 export function convertMarkdownToHtml(text: string): string {
-  let html = text.replace(/\n/g, '<br/>');
-  html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" style="color: #2563eb; font-weight: 600; text-decoration: underline;">$1</a>');
+  // 1. Convert markdown-style links [Anchor Text](http...)
+  let html = text.replace(
+    /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+    '<a href="$2" style="color: #2563eb; font-weight: 600; text-decoration: underline;">$1</a>'
+  );
+
+  // 2. Convert standalone raw URLs (not already inside href="...")
+  html = html.replace(
+    /(^|[^">])(https?:\/\/[^\s<)]+?)([.,;]?)(\s|$|<)/g,
+    '$1<a href="$2" style="color: #2563eb; font-weight: 600; text-decoration: underline;">$2</a>$3$4'
+  );
+
+  // 3. Convert newlines to HTML breaks
+  html = html.replace(/\n/g, '<br/>');
   return html;
 }
 

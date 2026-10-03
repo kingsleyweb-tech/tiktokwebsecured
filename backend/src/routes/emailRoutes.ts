@@ -124,15 +124,16 @@ router.post('/send', async (req: Request, res: Response) => {
       return;
     }
 
-    let displayName = 'Security Awareness Training';
-    let platformKey = '';
-    if (templateId.includes('tiktok')) {
+    const tid = (templateId || '').toLowerCase();
+    let displayName = 'Account Security';
+    let platformKey = 'tiktok';
+    if (tid.includes('tiktok') || tid === 'tpl-002') {
       displayName = 'Team TikTok';
       platformKey = 'tiktok';
-    } else if (templateId.includes('snapchat')) {
+    } else if (tid.includes('snapchat') || tid === 'tpl-003') {
       displayName = 'Team Snapchat';
       platformKey = 'snapchat';
-    } else if (templateId.includes('facebook')) {
+    } else if (tid.includes('facebook') || tid === 'tpl-001') {
       displayName = 'Team Facebook';
       platformKey = 'snapchat'; // Fallback
     }

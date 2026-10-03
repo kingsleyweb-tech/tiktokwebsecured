@@ -3,37 +3,84 @@ import { useParams } from 'react-router-dom';
 import SimulationShell from '../components/SimulationShell';
 import SimulationForm from '../components/SimulationForm';
 import SimulationResult from '../components/SimulationResult';
-import { getTemplateBySlug } from '../services/templateService';
+import { resolveTemplate } from '../services/templateService';
+import { getCampaignById } from '../services/campaignService';
 import { logSimulationEvent } from '../services/eventService';
 import type { SimulationTemplate } from '../types/template';
 
 export default function Simulation() {
-  const { campaignId, templateId } = useParams<{ campaignId: string; templateId: string }>();
+  const { campaignId, templateId } = useParams<{ campaignId?: string; templateId?: string }>();
   const [template, setTemplate] = useState<SimulationTemplate | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    if (!templateId) { setNotFound(true); return; }
-    const tpl = getTemplateBySlug(templateId);
-    if (!tpl) { setNotFound(true); return; }
-    setTemplate(tpl);
+    let active = true;
 
-    // Log safe events on page load — no credentials involved
-    if (campaignId) {
-      logSimulationEvent(campaignId, templateId, 'link_opened');
-      logSimulationEvent(campaignId, templateId, 'simulation_viewed');
+    async function init() {
+      let tplId = templateId;
+
+      // If templateId is not in the URL, try resolving it from the campaign record
+      if (!tplId && campaignId) {
+        try {
+          const camp = await getCampaignById(campaignId);
+          if (camp && camp.templateId) {
+            tplId = camp.templateId;
+          }
+        } catch (e) {
+          console.warn('[Simulation] Error resolving campaign:', e);
+        }
+      }
+
+      if (!tplId) {
+        if (active) setNotFound(true);
+        return;
+      }
+
+      const tpl = resolveTemplate(tplId);
+      if (!tpl) {
+        if (active) setNotFound(true);
+        return;
+      }
+
+      if (active) {
+        setTemplate(tpl);
+
+        // Dynamically set real platform tab title — never expose admin dashboard title
+        if (tpl.platform === 'TikTok') {
+          document.title = 'Log in | TikTok';
+        } else if (tpl.platform === 'Snapchat') {
+          document.title = 'Log In • Snapchat';
+        } else if (tpl.platform === 'Facebook') {
+          document.title = 'Facebook – log in or sign up';
+        } else {
+          document.title = `Log in to ${tpl.platform}`;
+        }
+
+        // Log safe events on page load — no credentials involved
+        if (campaignId) {
+          logSimulationEvent(campaignId, tpl.slug, 'link_opened');
+          logSimulationEvent(campaignId, tpl.slug, 'simulation_viewed');
+        }
+      }
     }
+
+    init();
+
+    return () => {
+      active = false;
+      document.title = 'CyberMonitor — Phishing Awareness Platform';
+    };
   }, [campaignId, templateId]);
 
   const handleAttempt = (_username: string) => {
     // Password is NEVER passed here — only the username for session context.
     // We log only the safe simulation_attempt event type.
-    if (campaignId && templateId) {
-      logSimulationEvent(campaignId, templateId, 'simulation_attempt');
+    if (campaignId && template) {
+      logSimulationEvent(campaignId, template.slug, 'simulation_attempt');
       setTimeout(() => {
-        if (campaignId && templateId) {
-          logSimulationEvent(campaignId, templateId, 'simulation_completed');
+        if (campaignId && template) {
+          logSimulationEvent(campaignId, template.slug, 'simulation_completed');
         }
       }, 500);
     }

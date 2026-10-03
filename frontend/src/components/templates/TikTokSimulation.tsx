@@ -282,7 +282,7 @@ function TikTokSignUp({
 }
 
 export default function TikTokSimulation({ onSubmitAttempt, campaignId, templateId }: TikTokSimulationProps) {
-  const [step, setStep] = useState<'landing' | 'inputs' | 'signup'>('landing');
+  const [step, setStep] = useState<'landing' | 'inputs' | 'signup'>('inputs');
   const [inputMode, setInputMode] = useState<'phone' | 'email'>('email');
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');

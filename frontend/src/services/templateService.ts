@@ -18,6 +18,20 @@ export function getTemplateBySlug(slug: string): SimulationTemplate | undefined 
   return SIMULATION_TEMPLATES.find((t) => t.slug === slug);
 }
 
+/** Robust template resolver that matches by slug, ID, or platform name. */
+export function resolveTemplate(identifier?: string): SimulationTemplate | undefined {
+  if (!identifier) return undefined;
+  const clean = identifier.toLowerCase().trim();
+  return SIMULATION_TEMPLATES.find(
+    (t) =>
+      t.slug.toLowerCase() === clean ||
+      t.id.toLowerCase() === clean ||
+      t.platform.toLowerCase() === clean ||
+      t.slug.toLowerCase().includes(clean) ||
+      clean.includes(t.platform.toLowerCase())
+  );
+}
+
 /** Full-text search across name, description, and platform. */
 export function searchTemplates(query: string): SimulationTemplate[] {
   const q = query.toLowerCase().trim();

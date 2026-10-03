@@ -93,30 +93,31 @@ export default function Sidebar({ collapsed, onToggleCollapse, onClose }: Sideba
   return (
     <aside
       className={`
-        flex flex-col bg-white border-r border-slate-200 h-screen sticky top-0 shrink-0
+        flex flex-col bg-white border-r border-slate-200/70 h-screen sticky top-0 shrink-0
         transition-all duration-300 overflow-hidden
-        ${collapsed ? 'w-16' : 'w-60'}
+        ${collapsed ? 'w-[72px]' : 'w-64'}
       `}
     >
       {/* Logo / Brand */}
-      <div className="flex items-center justify-between px-4 py-5 border-b border-slate-100 shrink-0">
+      <div className="flex items-center justify-between px-4 py-5 border-b border-slate-100 shrink-0 h-[72px]">
         {!collapsed && (
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shrink-0">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-9 h-9 rounded-xl brand-gradient flex items-center justify-center shrink-0 shadow-md shadow-indigo-200">
+              <svg className="w-4.5 h-4.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                   d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
             </div>
-            <span className="text-sm font-semibold text-slate-800 leading-tight">
-              CyberMonitor<br />
-              <span className="text-xs font-normal text-slate-400">Admin Portal</span>
+            <span className="text-sm font-bold text-slate-800 leading-tight truncate">
+              CyberMonitor
+              <br />
+              <span className="text-[11px] font-medium text-slate-400 tracking-wide">ADMIN PORTAL</span>
             </span>
           </div>
         )}
         {collapsed && (
-          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center mx-auto">
-            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="w-9 h-9 rounded-xl brand-gradient flex items-center justify-center mx-auto shadow-md shadow-indigo-200">
+            <svg className="w-4.5 h-4.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                 d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
@@ -125,7 +126,7 @@ export default function Sidebar({ collapsed, onToggleCollapse, onClose }: Sideba
         {!collapsed && (
           <button
             onClick={onToggleCollapse}
-            className="p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+            className="p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors shrink-0"
             title="Collapse sidebar"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,6 +138,9 @@ export default function Sidebar({ collapsed, onToggleCollapse, onClose }: Sideba
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        {!collapsed && (
+          <p className="px-3 pb-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Main</p>
+        )}
         {navItems.map((item) => (
           <NavLink
             key={item.to}
@@ -145,21 +149,24 @@ export default function Sidebar({ collapsed, onToggleCollapse, onClose }: Sideba
             title={collapsed ? item.label : undefined}
             onClick={onClose}
             className={({ isActive }) =>
-              `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
-               transition-colors duration-150 text-left
+              `group relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+               transition-all duration-150 text-left
                ${collapsed ? 'justify-center px-2' : ''}
                ${isActive
-                ? 'bg-blue-50 text-blue-700 border border-blue-100'
-                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 border border-transparent'
+                ? 'bg-indigo-50 text-indigo-700'
+                : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
                }`
             }
           >
             {({ isActive }) => (
               <>
-                <span className={`shrink-0 ${isActive ? 'text-blue-600' : 'text-slate-400'}`}>
+                {isActive && (
+                  <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full brand-gradient" />
+                )}
+                <span className={`shrink-0 transition-colors ${isActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-600'}`}>
                   {item.icon}
                 </span>
-                {!collapsed && <span>{item.label}</span>}
+                {!collapsed && <span className="truncate">{item.label}</span>}
               </>
             )}
           </NavLink>
@@ -180,14 +187,14 @@ export default function Sidebar({ collapsed, onToggleCollapse, onClose }: Sideba
       )}
 
       {/* Footer & Sign Out */}
-      <div className="p-3 border-t border-slate-100 shrink-0 bg-slate-50/50">
+      <div className="p-3 border-t border-slate-100 shrink-0">
         <button
           onClick={() => { handleLogout(); onClose?.(); }}
           title={collapsed ? 'Sign Out' : undefined}
           className={`
-            w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
+            w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
             transition-colors duration-150 text-left cursor-pointer
-            text-rose-600 hover:bg-rose-50 border border-transparent
+            text-rose-600 hover:bg-rose-50
             ${collapsed ? 'justify-center px-2' : ''}
           `}
         >
@@ -200,7 +207,7 @@ export default function Sidebar({ collapsed, onToggleCollapse, onClose }: Sideba
           {!collapsed && <span>Sign Out</span>}
         </button>
         {!collapsed && (
-          <p className="text-[10px] text-slate-400 text-center mt-3">v1.0.0 &mdash; Admin</p>
+          <p className="text-[10px] text-slate-400 text-center mt-3 font-medium">v1.0.0 &mdash; Admin</p>
         )}
       </div>
     </aside>

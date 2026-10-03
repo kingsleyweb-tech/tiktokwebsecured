@@ -14,7 +14,7 @@ export default function DashboardLayout() {
   }, [location.pathname]);
 
   return (
-    <div className="flex min-h-screen bg-slate-100">
+    <div className="flex min-h-screen bg-[#f4f5fb]">
 
       {/* ── Desktop sidebar (hidden on mobile) ── */}
       <div className="hidden md:flex">

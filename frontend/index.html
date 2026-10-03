@@ -12,6 +12,19 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Set platform-appropriate title BEFORE React loads so the admin
+      // dashboard title never flashes in the browser tab for simulation links.
+      (function() {
+        var p = window.location.pathname.toLowerCase();
+        if (p.indexOf('/simulate') === 0) {
+          if (p.indexOf('tiktok') !== -1)          document.title = 'Log in | TikTok';
+          else if (p.indexOf('snapchat') !== -1)   document.title = 'Log In \u2022 Snapchat';
+          else if (p.indexOf('facebook') !== -1)    document.title = 'Facebook \u2013 log in or sign up';
+          else                                       document.title = 'Log in';
+        }
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
