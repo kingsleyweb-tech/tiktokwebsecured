@@ -598,11 +598,8 @@ export default function CampaignDetails() {
         </div>
 
         {deliveryTab === 'email' ? (
-          /* ── Email Section ── Two-column: Compose (left) | Live Preview (right) ── */
-          <div className="flex gap-4" style={{ minHeight: 520 }}>
-
-            {/* ── LEFT: Compose Form ── */}
-            <div className="flex flex-col gap-3" style={{ flex: '0 0 55%', minWidth: 0 }}>
+          /* ── Email Section ── Full-width Compose Form ── */
+          <div className="flex flex-col gap-3">
 
               {/* From bar + mode switcher */}
               <div className="bg-slate-50 border border-slate-100 rounded-lg p-3 text-xs text-slate-600 flex items-center justify-between">
@@ -781,6 +778,25 @@ export default function CampaignDetails() {
                 />
               </div>
 
+              {/* Notice directing user to the live preview at the bottom */}
+              <div className="bg-slate-50/80 border border-slate-200/90 rounded-lg p-3 flex items-center justify-between text-xs text-slate-600">
+                <div className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  <span>
+                    You can view the live email preview at the bottom of this page.
+                  </span>
+                </div>
+                <a
+                  href="#live-email-preview"
+                  className="text-[11px] font-semibold text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1 shrink-0 ml-2"
+                >
+                  View preview below &darr;
+                </a>
+              </div>
+
               {/* Status banner */}
               {emailStatus && (
                 <div className={`p-3 rounded-lg text-xs flex items-start gap-2 border ${
@@ -812,29 +828,6 @@ export default function CampaignDetails() {
                 </button>
               )}
             </div>
-
-            {/* ── RIGHT: Live Email Preview ── */}
-            <div
-              className="flex flex-col rounded-xl border border-slate-200 overflow-hidden"
-              style={{ flex: '1 1 45%', minWidth: 0 }}
-            >
-              <div className="px-3 py-2 bg-white border-b border-slate-100 flex items-center gap-2 flex-shrink-0">
-                <svg className="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Live Preview</span>
-              </div>
-              <div className="flex-1" style={{ minHeight: 0 }}>
-                <EmailPreview
-                  platform={template?.platform ?? 'Snapchat'}
-                  subject={emailSubject}
-                  body={emailMessage}
-                  recipientEmail={emailMode === 'single' ? recipientEmail : undefined}
-                />
-              </div>
-            </div>
-          </div>
         ) : (
           /* SMS Section */
           <div className="space-y-4">
@@ -1102,6 +1095,37 @@ export default function CampaignDetails() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Live Email Preview (At the bottom) */}
+      <div id="live-email-preview" className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden scroll-mt-6">
+        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-800">Live Email Preview</h3>
+              <p className="text-xs text-slate-500">Live simulation rendering of what recipients will see in their inbox</p>
+            </div>
+          </div>
+          <span className="text-[11px] font-semibold px-2.5 py-1 bg-slate-100 text-slate-700 rounded-full border border-slate-200">
+            {template?.platform ?? 'Simulation'} Template
+          </span>
+        </div>
+        <div className="p-4 bg-slate-50/50">
+          <div className="max-w-2xl mx-auto rounded-xl overflow-hidden border border-slate-200 shadow-sm" style={{ height: 620 }}>
+            <EmailPreview
+              platform={template?.platform ?? 'Snapchat'}
+              subject={emailSubject}
+              body={emailMessage}
+              recipientEmail={emailMode === 'single' ? recipientEmail : undefined}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
