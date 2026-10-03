@@ -49,6 +49,8 @@ export default function App() {
       <Routes>
         {/* ── Public routes ── */}
         <Route path="/simulate/:campaignId/:templateId" element={<Simulation />} />
+        <Route path="/simulate/:campaignId" element={<Simulation />} />
+        <Route path="/simulate/*" element={<Simulation />} />
         <Route path="/watch/:videoId" element={<VideoGate />} />
 
         {/* ── Auth routes (redirect to / if already logged in) ── */}
